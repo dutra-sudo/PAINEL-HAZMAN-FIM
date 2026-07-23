@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Ações</title>
+<style>
+  :root{
+    --dark:#0d2137;
+    --mid:#1a3a5c;
+    --accent:#1e6fa8;
+    --light:#e8f2fa;
+    --bg:#f4f7fa;
+    --ink:#1c2b36;
+    --muted:#5c7286;
+    --border:#dce6ee;
+    --favoravel:#2f7d4f;
+    --favoravel-bg:#e6f3ea;
+    --acordo:#6a4c93;
+    --acordo-bg:#efe9f6;
+    --encerrado:#5c6672;
+    --encerrado-bg:#eceff1;
+    --aguardando:#b0651c;
+    --aguardando-bg:#fbeddd;
+    --andamento:#1e6fa8;
+    --andamento-bg:#e8f2fa;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+  header.top{
+    background:linear-gradient(135deg,var(--dark),var(--mid));
+    color:#fff;
+    padding:48px 32px 40px;
+  }
+  .wrap{max-width:880px;margin:0 auto;}
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#a9c6dd;
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Playfair Display',serif;
+    font-size:32px;
+    margin:0 0 14px;
+    font-weight:700;
+  }
+  .meta{
+    font-size:13px;
+    color:#c3d8e8;
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 18px;
+  }
+  .meta b{color:#fff;font-weight:600;}
+
+  main{max-width:880px;margin:0 auto;padding:32px 32px 64px;}
+
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:22px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .toolbar button{
+    background:#fff;
+    border:1px solid var(--border);
+    color:var(--accent);
+    font-weight:600;
+    font-size:13px;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:background .15s;
+  }
+  .toolbar button:hover{background:var(--light);}
+  .toolbar button:disabled{opacity:.5;cursor:default;}
+  .spin{animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .state-box{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:32px;
+    text-align:center;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .state-box.error{color:#a33;}
+  .state-box code{
+    display:block;
+    margin-top:12px;
+    background:var(--bg);
+    padding:10px;
+    border-radius:6px;
+    font-size:12px;
+    text-align:left;
+    overflow-x:auto;
+  }
+
+  .card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:12px;
+    margin-bottom:14px;
+    overflow:hidden;
+    transition:box-shadow .15s;
+  }
+  .card:hover{box-shadow:0 2px 10px rgba(13,33,55,.06);}
+
+  .card-head{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    padding:18px 20px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .card-num{
+    flex:0 0 auto;
+    width:30px;height:30px;
+    border-radius:50%;
+    background:var(--light);
+    color:var(--mid);
+    font-weight:700;
+    font-size:13px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .card-title-wrap{flex:1;min-width:0;}
+  .card-proc{
+    font-size:13px;
+    color:var(--muted);
+    font-weight:500;
+    margin-bottom:3px;
+  }
+  .card-title{
+    font-size:15px;
+    font-weight:600;
+    color:var(--dark);
+    line-height:1.4;
+  }
+  .badge{
+    flex:0 0 auto;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.03em;
+    padding:5px 10px;
+    border-radius:20px;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .badge.favoravel{color:var(--favoravel);background:var(--favoravel-bg);}
+  .badge.acordo{color:var(--acordo);background:var(--acordo-bg);}
+  .badge.encerrado{color:var(--encerrado);background:var(--encerrado-bg);}
+  .badge.aguardando{color:var(--aguardando);background:var(--aguardando-bg);}
+  .badge.andamento{color:var(--andamento);background:var(--andamento-bg);}
+
+  .chevron{
+    flex:0 0 auto;
+    width:20px;height:20px;
+    color:var(--muted);
+    transition:transform .2s;
+    margin-top:2px;
+  }
+  .card.open .chevron{transform:rotate(180deg);}
+
+  .card-body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .25s ease;
+  }
+  .card-body-inner{
+    padding:0 20px 20px 64px;
+    font-size:14px;
+    line-height:1.65;
+    color:var(--ink);
+    white-space:pre-wrap;
+  }
+
+  footer{
+    max-width:880px;
+    margin:0 auto;
+    padding:0 32px 48px;
+    color:var(--muted);
+    font-size:12.5px;
+    border-top:1px solid var(--border);
+    padding-top:20px;
+  }
+  footer .firm{font-weight:700;color:var(--dark);margin-bottom:4px;}
+
+  @media (max-width:600px){
+    header.top{padding:32px 20px 28px;}
+    main{padding:24px 20px 48px;}
+    h1{font-size:24px;}
+    .card-body-inner{padding-left:20px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Relatório de Ações</div>
+    <h1 id="clientName">Carregando...</h1>
+    <div class="meta">
+      <span><b>Atualização automática</b> a partir do Doc de origem</span>
+      <span id="lastSync"></span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <span id="statusLine">Carregando processos…</span>
+    <button id="refreshBtn" onclick="carregarDados(true)">
+      <svg id="refreshIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Atualizar agora
+    </button>
+  </div>
+
+  <div id="content">
+    <div class="state-box" id="loadingBox">Buscando as informações mais recentes…</div>
+  </div>
+</main>
+
+<footer>
+  <div class="firm">BARTOLOMEO BHERING BRAGA DUTRA ADVOGADOS ASSOCIADOS</div>
+  <div>Matheus Dutra · OAB/MG 122.243 | Felipe Bartolomeo · OAB/MG 95.264</div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO — ajuste estes valores para cada cliente/painel
+   ============================================================ */
+const CONFIG = {
+  clientName: "Hazman Gerenciamento e Serviços",
+  // Cole aqui a URL do Apps Script implantado (termina em /exec).
+  // Veja instruções no arquivo Code.gs.
+  scriptUrl: "https://script.google.com/macros/s/AKfycbw4pMgHEZ1wGKAwiQTm3bGiVsrMvm8hoPUj7bNfRXCWzTj-e84TLsrEHA4jq33wSW7p/exec"
+};
+/* ============================================================ */
+
+function classificar(texto) {
+  const t = texto.toLowerCase();
+  if (/\bacordo\b/.test(t)) return {label:'Acordo', key:'acordo'};
+  if (/(ganhamos|favor[aá]vel|procedente|vit[oó]ria|deferido|julgando nossos pedidos procedentes)/.test(t)) return {label:'Favorável', key:'favoravel'};
+  if (/(extin[cç][ãa]o|extinto|encerrad[oa]|arquivado)/.test(t)) return {label:'Encerrado', key:'encerrado'};
+  if (/(aguardando|aguarda[- ]se|aguarda\b)/.test(t)) return {label:'Aguardando', key:'aguardando'};
+  return {label:'Em andamento', key:'andamento'};
+}
+
+function extrairCabecalho(texto, indice) {
+  const numMatch = texto.match(/\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}/);
+  const numProcesso = numMatch ? numMatch[0] : null;
+
+  const partes = texto.split('–');
+  let titulo = null;
+  if (partes.length >= 2) {
+    titulo = partes[1].trim().split(/\s{2,}|Partes:/)[0].trim();
+    if (partes.length >= 3) {
+      const acao = partes[2].split('Partes:')[0].trim();
+      if (acao) titulo = titulo + ' · ' + acao;
+    }
+  }
+  if (!titulo) {
+    titulo = texto.replace(/^\d+(\.\d+)?\.?\s*/, '').slice(0, 100).trim() + '…';
+  }
+
+  return { numProcesso, titulo };
+}
+
+function dividirSubProcessos(texto) {
+  const partes = texto.split(/(?=\d+\.\d+\s*PROCESSO)/i);
+  return partes.map(p => p.trim()).filter(p => p.length > 20);
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderizar(payload) {
+  document.getElementById('clientName').textContent = CONFIG.clientName;
+
+  const dt = new Date(payload.updatedAt);
+  document.getElementById('lastSync').textContent =
+    'Última sincronização: ' + dt.toLocaleDateString('pt-BR') + ' às ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+
+  let todos = [];
+  payload.processos.forEach(t => { todos = todos.concat(dividirSubProcessos(t)); });
+
+  document.getElementById('statusLine').textContent =
+    todos.length + (todos.length === 1 ? ' processo listado' : ' processos listados');
+
+  const content = document.getElementById('content');
+
+  if (todos.length === 0) {
+    content.innerHTML = '<div class="state-box">Nenhum processo encontrado no documento de origem.</div>';
+    return;
+  }
+
+  content.innerHTML = todos.map((texto, i) => {
+    const { numProcesso, titulo } = extrairCabecalho(texto, i);
+    const status = classificar(texto);
+    return `
+      <div class="card">
+        <div class="card-head" onclick="this.parentElement.classList.toggle('open'); toggleBody(this)">
+          <div class="card-num">${i + 1}</div>
+          <div class="card-title-wrap">
+            ${numProcesso ? `<div class="card-proc">Processo nº ${numProcesso}</div>` : ''}
+            <div class="card-title">${escapeHtml(titulo)}</div>
+          </div>
+          <div class="badge ${status.key}">${status.label}</div>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">${escapeHtml(texto)}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleBody(headEl) {
+  const body = headEl.nextElementSibling;
+  const inner = body.querySelector('.card-body-inner');
+  if (body.style.maxHeight) {
+    body.style.maxHeight = null;
+  } else {
+    body.style.maxHeight = inner.scrollHeight + 40 + 'px';
+  }
+}
+
+function mostrarErro(msg) {
+  document.getElementById('clientName').textContent = CONFIG.clientName;
+  document.getElementById('statusLine').textContent = 'Não foi possível carregar os dados.';
+  document.getElementById('content').innerHTML = `
+    <div class="state-box error">
+      Não foi possível buscar as informações agora.<br>
+      ${msg}
+    </div>`;
+}
+
+let carregando = false;
+async function carregarDados(manual) {
+  if (carregando) return;
+  carregando = true;
+
+  const btn = document.getElementById('refreshBtn');
+  const icon = document.getElementById('refreshIcon');
+  btn.disabled = true;
+  icon.classList.add('spin');
+
+  if (manual) {
+    document.getElementById('statusLine').textContent = 'Atualizando…';
+  }
+
+  if (!CONFIG.scriptUrl || CONFIG.scriptUrl.indexOf('COLE_AQUI') !== -1) {
+    mostrarErro('O painel ainda não foi conectado ao Doc de origem. Configure CONFIG.scriptUrl no código (veja instruções no arquivo Code.gs).');
+    carregando = false;
+    btn.disabled = false;
+    icon.classList.remove('spin');
+    return;
+  }
+
+  try {
+    // Sem parâmetro callback: o Code.gs devolve JSON puro (não JSONP)
+    const resp = await fetch(CONFIG.scriptUrl + '?_=' + Date.now());
+    if (!resp.ok) {
+      throw new Error('HTTP ' + resp.status);
+    }
+    const data = await resp.json();
+    renderizar(data);
+  } catch (err) {
+    mostrarErro(
+      'Detalhe técnico: ' + (err && err.message ? err.message : String(err)) + '.<br>' +
+      'Verifique se a URL do Apps Script em CONFIG.scriptUrl está correta e se a implantação está com acesso "Qualquer pessoa". ' +
+      'Se o erro persistir, pode ser bloqueio de rede externa dentro deste ambiente — nesse caso o painel precisa ser hospedado fora do Claude.ai (ex: Google Sites, GitHub Pages).'
+    );
+  } finally {
+    carregando = false;
+    btn.disabled = false;
+    icon.classList.remove('spin');
+  }
+}
+
+carregarDados(false);
+</script>
+</body>
+</html>
